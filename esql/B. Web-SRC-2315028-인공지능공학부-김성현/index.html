@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>눈송이 은행</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f8fb;
+        }
+        .container {
+            margin: 50px auto;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>눈송이 은행</h1>
+        <div id="menu">
+            <button onclick="fetchUserInfo()">사용자 정보 조회</button>
+            <button onclick="fetchAccountHistory()">거래내역 조회</button>
+            <button onclick="updateAccount()">입출금</button>
+            <button onclick="createUser()">신규 사용자 생성</button>
+            <button onclick="fetchBranchInfo()">은행지점 조회</button>
+            <button onclick="exit()">종료</button>
+        </div>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:5000';
+
+        async function fetchUserInfo() {
+            const userId = prompt("사용자 ID를 입력하세요:");
+            if (!userId) return alert("ID를 입력하세요.");
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/${userId}`);
+                if (!response.ok) throw new Error("사용자 정보를 가져오는 데 실패했습니다.");
+                const data = await response.json();
+                displayResult(data, "사용자 정보");
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function fetchAccountHistory() {
+            const accountNumber = prompt("계좌번호를 입력하세요:");
+            if (!accountNumber) return alert("계좌번호를 입력하세요.");
+            try {
+                const response = await fetch(`${API_BASE_URL}/account/history/${accountNumber}/transactions`);
+                if (!response.ok) throw new Error("거래내역을 가져오는 데 실패했습니다.");
+                const data = await response.json();
+                displayResult(data, "거래내역");
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function updateAccount() {
+            const accountNumber = prompt("계좌번호를 입력하세요 :");
+            const transactionType = prompt("입금/출금 중 입력하세요 : ");
+            const amount = prompt(`${transactionType}할 금액을 입력하세요 :`);
+
+            const data = {
+                accountNumber: accountNumber,
+                amount: amount,
+                transactionType: transactionType
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/account/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function createUser() {
+            const userData = {
+                user: [
+                    prompt("사용자 ID:"),
+                    prompt("이름:"),
+                    prompt("성별 (M/F):"),
+                    prompt("연락처 (010-0000-0000):"),
+                    prompt("주민번호 (900101-1234567):"),
+                    prompt("지점 번호:")
+                ],
+                account: [
+                    prompt("계좌번호:"),
+                    prompt("사용자 ID:"),
+                    prompt("계좌유형 (저축/당좌/정기예금):"),
+                    prompt("초기 잔액:"),
+                    prompt("지점 번호:")
+                ]
+            };
+            try {
+                const response = await fetch(`${API_BASE_URL}/user`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(userData)
+                });
+                if (!response.ok) throw new Error("사용자 및 계좌 생성에 실패했습니다.");
+                const data = await response.json();
+                alert(data.message);
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function fetchBranchInfo() {
+            const branchId = prompt("지점 ID를 입력하세요:");
+            if (!branchId) return alert("지점 ID를 입력하세요.");
+            try {
+                const response = await fetch(`${API_BASE_URL}/branch/${branchId}`);
+                if (!response.ok) throw new Error("지점 정보를 가져오는 데 실패했습니다.");
+                const data = await response.json();
+                displayResult(data, "지점 정보");
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function displayResult(data, title) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>${title}</h2><pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        async function exit() {
+        if (confirm("프로그램을 종료하시겠습니까?")) {
+            window.close();  
+            alert("눈송이 은행이 종료되었습니다! *브라우저창을 닫아주세요*")
+        }
+        }
+    </script>
+</body>
+</html>
