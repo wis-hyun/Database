@@ -1,0 +1,29 @@
+CREATE TABLE Supplier (
+	S_shap CHAR(2) PRIMARY KEY,
+    SNAME VARCHAR(50) NOT NULL,
+    STATUS INT,
+    CITY VARCHAR(50) NOT NULL
+);
+CREATE TABLE Part (
+	P_shap CHAR(2) PRIMARY KEY,
+    PNAME VARCHAR(50) NOT NULL,
+    COLOR VARCHAR(50) NOT NULL,
+    WEIGHT INT,
+    CITY VARCHAR(50) NOT NULL
+);
+CREATE TABLE Project (
+	J_shap CHAR(2) PRIMARY KEY,
+    JNAME VARCHAR(50) NOT NULL,
+    CITY VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE SPJ (
+	S_shap CHAR(2),
+    P_shap CHAR(2),
+    J_shap CHAR(2),
+    QTY INT,
+    PRIMARY KEY (S_shap, P_shap, J_shap),
+    FOREIGN KEY (S_shap) REFERENCES Supplier(S_shap),
+    FOREIGN KEY (P_shap) REFERENCES Part(P_shap),
+	FOREIGN KEY (J_shap) REFERENCES Project(J_shap)
+);
